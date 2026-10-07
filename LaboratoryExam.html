@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Laboratory Reservation System</title>
+    <style>
+        /* Base Reset & Variables */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        :root {
+            --primary-color: #123c69;
+            --primary-hover: #0d2b4c;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --text-muted: #666666;
+            --border-color: #e0e0e0;
+            --success-color: #2e7d32;
+            --warning-color: #f57f17;
+            --danger-color: #c62828;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        .btn-success:hover {
+            background-color: #1b5e20;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        .btn-danger:hover {
+            background-color: #b71c1c;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        .badge-approved {
+            background-color: #e8f5e9;
+            color: var(--success-color);
+        }
+
+        .badge-pending {
+            background-color: #fffde7;
+            color: var(--warning-color);
+        }
+
+        .badge-rejected {
+            background-color: #ffebee;
+            color: var(--danger-color);
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* Table Styling */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        /* Login Screen Layout */
+        #login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            background-color: var(--bg-color);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            padding: 32px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .login-header h1 {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .alert-error {
+            background-color: #ffebee;
+            color: var(--danger-color);
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            border: 1px solid #ffcdd2;
+        }
+
+        .alert-success {
+            background-color: #e8f5e9;
+            color: var(--success-color);
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            border: 1px solid #c8e6c9;
+        }
+
+        .demo-box {
+            margin-top: 24px;
+            padding: 12px;
+            background-color: #eef3f8;
+            border-radius: 4px;
+            border-left: 4px solid var(--primary-color);
+            font-size: 12px;
+            color: #444;
+        }
+
+        .demo-box h4 {
+            margin-bottom: 6px;
+            color: var(--primary-color);
+        }
+
+        /* System Main Layout */
+        #app-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--primary-color);
+            color: #ffffff;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 0;
+            flex-grow: 1;
+        }
+
+        .sidebar-menu li a {
+            display: block;
+            padding: 12px 20px;
+            color: #d1dfeClear;
+            color: #cce0f5;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-menu li a:hover,
+        .sidebar-menu li a.active {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid #ffffff;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            margin-bottom: 24px;
+        }
+
+        .content-header h2 {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .content-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Grid & Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .stat-card h3 {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Filter controls layout */
+        .filter-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar .form-group {
+            margin-bottom: 0;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        /* Responsive Design Rules */
+        @media (max-width: 768px) {
+            #app-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                flex-wrap: wrap;
+                padding: 0;
+            }
+
+            .sidebar-menu li {
+                flex: 1 1 auto;
+            }
+
+            .sidebar-menu li a {
+                text-align: center;
+                padding: 10px;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+
+            .sidebar-menu li a:hover,
+            .sidebar-menu li a.active {
+                border-left: none;
+                border-bottom: 3px solid #ffffff;
+            }
+
+            .main-content {
+                padding: 16px;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+            }
+
+            .filter-bar .form-group {
+                width: 100%;
+            }
+        }
+
+        @media print {
+            .sidebar, .btn, .filter-bar {
+                display: none !important;
+            }
+            .main-content {
+                padding: 0 !important;
+            }
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- LOGIN CONTAINER                            -->
+    <!-- ========================================== -->
+    <div id="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Computer Laboratory</h1>
+                <p>Reservation System</p>
+            </div>
+
+            <div id="login-alert" class="alert-error hidden"></div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email Address</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="login-role">Login As</label>
+                    <select id="login-role" class="form-control" required>
+                        <option value="">Select Role</option>
+                        <option value="Teacher">Teacher</option>
+                        <option value="Laboratory Coordinator">Laboratory Coordinator</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%; margin-top: 8px;">Login</button>
+            </form>
+
+            <div class="demo-box">
+                <h4>Demo Credentials</h4>
+                <p><strong>Email:</strong> teacher@dnsc.edu.ph</p>
+                <p><strong>Password:</strong> 123456</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- APP CONTAINER (SIDEBAR + MAIN CONTENT)     -->
+    <!-- ========================================== -->
+    <div id="app-container" class="hidden">
+        
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-brand">
+                Lab Reservation
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="nav-link active" data-section="sec-dashboard">Dashboard</a></li>
+                <li><a href="#" class="nav-link" data-section="sec-new-reservation">New Reservation</a></li>
+                <li><a href="#" class="nav-link" data-section="sec-my-reservations">My Reservations</a></li>
+                <li><a href="#" class="nav-link" data-section="sec-schedule">Laboratory Schedule</a></li>
+                <li><a href="#" class="nav-link" data-section="sec-coordinator">Coordinator</a></li>
+                <li><a href="#" class="nav-link" data-section="sec-reports">Reports</a></li>
+                <li><a href="#" id="logout-btn">Logout</a></li>
+            </ul>
+        </div>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="main-content">
+
+            <!-- 1. DASHBOARD SECTION -->
+            <section id="sec-dashboard" class="app-section">
+                <div class="content-header">
+                    <h2 id="dash-title">Teacher Dashboard</h2>
+                    <p>Manage your computer laboratory reservations.</p>
+                </div>
+
+                <div class="card">
+                    <h3 id="welcome-title" style="color: var(--primary-color); margin-bottom: 8px;">Welcome, Teacher!</h3>
+                    <p style="color: var(--text-muted); font-size: 14px;">You can create and monitor your laboratory reservations through this system.</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Reservations</h3>
+                        <div class="number" id="stat-teacher-total">12</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--warning-color);">
+                        <h3>Pending</h3>
+                        <div class="number" id="stat-teacher-pending" style="color: var(--warning-color);">3</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--success-color);">
+                        <h3>Approved</h3>
+                        <div class="number" id="stat-teacher-approved" style="color: var(--success-color);">8</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--danger-color);">
+                        <h3>Rejected</h3>
+                        <div class="number" id="stat-teacher-rejected" style="color: var(--danger-color);">1</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: var(--primary-color); margin-bottom: 16px;">Recent Reservations</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Laboratory</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Purpose</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Computer Lab 1</td>
+                                    <td>October 10, 2026</td>
+                                    <td>8:00 AM - 10:00 AM</td>
+                                    <td>Programming Class</td>
+                                    <td><span class="badge badge-approved">Approved</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Computer Lab 2</td>
+                                    <td>October 12, 2026</td>
+                                    <td>1:00 PM - 3:00 PM</td>
+                                    <td>Laboratory Activity</td>
+                                    <td><span class="badge badge-pending">Pending</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Computer Lab 3</td>
+                                    <td>October 15, 2026</td>
+                                    <td>9:00 AM - 11:00 AM</td>
+                                    <td>IT Laboratory</td>
+                                    <td><span class="badge badge-rejected">Rejected</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. NEW RESERVATION SECTION -->
+            <section id="sec-new-reservation" class="app-section hidden">
+                <div class="content-header">
+                    <h2>New Laboratory Reservation</h2>
+                    <p>Fill in the details below to submit a new laboratory request.</p>
+                </div>
+
+                <div class="card" style="max-width: 700px;">
+                    <div id="reservation-alert" class="alert-success hidden">Reservation submitted successfully!</div>
+                    
+                    <form id="reservation-form">
+                        <div class="form-group">
+                            <label for="res-teacher">Teacher Name</label>
+                            <input type="text" id="res-teacher" class="form-control" placeholder="Enter teacher name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="res-lab">Laboratory</label>
+                            <select id="res-lab" class="form-control" required>
+                                <option value="">Select Laboratory</option>
+                                <option value="Computer Laboratory 1">Computer Laboratory 1</option>
+                                <option value="Computer Laboratory 2">Computer Laboratory 2</option>
+                                <option value="Computer Laboratory 3">Computer Laboratory 3</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="res-date">Reservation Date</label>
+                            <input type="date" id="res-date" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="res-students">Number of Students</label>
+                            <input type="number" id="res-students" class="form-control" placeholder="Enter number of students" min="1" required>
+                        </div>
+
+                        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                            <div class="form-group" style="flex: 1; min-width: 140px;">
+                                <label for="res-start">Start Time</label>
+                                <input type="time" id="res-start" class="form-control" required>
+                            </div>
+                            <div class="form-group" style="flex: 1; min-width: 140px;">
+                                <label for="res-end">End Time</label>
+                                <input type="time" id="res-end" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="res-purpose">Purpose</label>
+                            <textarea id="res-purpose" class="form-control" rows="3" placeholder="Enter purpose of reservation" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn">Submit Reservation</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 3. MY RESERVATIONS SECTION -->
+            <section id="sec-my-reservations" class="app-section hidden">
+                <div class="content-header">
+                    <h2>My Reservations</h2>
+                    <p>View and search all your submitted laboratory requests.</p>
+                </div>
+
+                <div class="card">
+                    <div class="filter-bar">
+                        <div class="form-group">
+                            <input type="text" id="my-res-search" class="form-control" placeholder="Search reservation...">
+                        </div>
+                        <div class="form-group">
+                            <select id="my-res-filter" class="form-control">
+                                <option value="All Status">All Status</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Laboratory</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Purpose</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="my-reservations-tbody">
+                                <!-- Dynamic Content Managed by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. LABORATORY SCHEDULE SECTION -->
+            <section id="sec-schedule" class="app-section hidden">
+                <div class="content-header">
+                    <h2>Laboratory Schedule</h2>
+                    <p>View confirmed schedules across all computer laboratories.</p>
+                </div>
+
+                <div class="card">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Laboratory</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Teacher</th>
+                                    <th>Purpose</th>
+                                </tr>
+                            </thead>
+                            <tbody id="schedule-tbody">
+                                <tr>
+                                    <td>Computer Lab 1</td>
+                                    <td>October 10, 2026</td>
+                                    <td>8:00 AM - 10:00 AM</td>
+                                    <td>Juan Dela Cruz</td>
+                                    <td>Programming Class</td>
+                                </tr>
+                                <tr>
+                                    <td>Computer Lab 2</td>
+                                    <td>October 10, 2026</td>
+                                    <td>10:00 AM - 12:00 PM</td>
+                                    <td>Maria Santos</td>
+                                    <td>Database Activity</td>
+                                </tr>
+                                <tr>
+                                    <td>Computer Lab 3</td>
+                                    <td>October 11, 2026</td>
+                                    <td>1:00 PM - 3:00 PM</td>
+                                    <td>Pedro Reyes</td>
+                                    <td>Networking Laboratory</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. COORDINATOR DASHBOARD SECTION -->
+            <section id="sec-coordinator" class="app-section hidden">
+                <div class="content-header">
+                    <h2>Coordinator Dashboard</h2>
+                    <p>Manage and process pending laboratory requests.</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card" style="border-left-color: var(--warning-color);">
+                        <h3>Pending Requests</h3>
+                        <div class="number" id="coord-stat-pending" style="color: var(--warning-color);">5</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--success-color);">
+                        <h3>Approved</h3>
+                        <div class="number" id="coord-stat-approved" style="color: var(--success-color);">25</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--danger-color);">
+                        <h3>Rejected</h3>
+                        <div class="number" id="coord-stat-rejected" style="color: var(--danger-color);">3</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Laboratories</h3>
+                        <div class="number">3</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: var(--primary-color); margin-bottom: 16px;">Pending Reservations</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Teacher</th>
+                                    <th>Laboratory</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coordinator-tbody">
+                                <!-- Dynamic Content Managed by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. REPORTS SECTION -->
+            <section id="sec-reports" class="app-section hidden">
+                <div class="content-header">
+                    <h2>Reservation Reports</h2>
+                    <p>Overview and printable summary of laboratory utilization.</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Reservations</h3>
+                        <div class="number">30</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--success-color);">
+                        <h3>Approved</h3>
+                        <div class="number" style="color: var(--success-color);">25</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--warning-color);">
+                        <h3>Pending</h3>
+                        <div class="number" style="color: var(--warning-color);">5</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--danger-color);">
+                        <h3>Rejected</h3>
+                        <div class="number" style="color: var(--danger-color);">3</div>
+                    </div>
+                </div>
+
+                <div class="card" style="text-align: right;">
+                    <button id="print-report-btn" class="btn">Print Report</button>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VANILLA JAVASCRIPT LOGIC                   -->
+    <!-- ========================================== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- DATA MEMORY STORE ---
+            let myReservationsData = [
+                { id: 1, lab: 'Computer Lab 1', date: 'October 10, 2026', time: '8:00 AM - 10:00 AM', purpose: 'Programming Class', status: 'Approved' },
+                { id: 2, lab: 'Computer Lab 2', date: 'October 12, 2026', time: '1:00 PM - 3:00 PM', purpose: 'Laboratory Activity', status: 'Pending' },
+                { id: 3, lab: 'Computer Lab 3', date: 'October 15, 2026', time: '9:00 AM - 11:00 AM', purpose: 'IT Laboratory', status: 'Rejected' }
+            ];
+
+            let pendingRequestsData = [
+                { id: 101, teacher: 'Juan Dela Cruz', lab: 'Computer Lab 1', date: 'October 20, 2026', time: '8:00 AM - 10:00 AM', status: 'Pending' },
+                { id: 102, teacher: 'Maria Santos', lab: 'Computer Lab 2', date: 'October 21, 2026', time: '1:00 PM - 3:00 PM', status: 'Pending' }
+            ];
+
+            // --- DOM ELEMENTS ---
+            const loginContainer = document.getElementById('login-container');
+            const appContainer = document.getElementById('app-container');
+            const loginForm = document.getElementById('login-form');
+            const loginAlert = document.getElementById('login-alert');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            const dashTitle = document.getElementById('dash-title');
+            const welcomeTitle = document.getElementById('welcome-title');
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const appSections = document.querySelectorAll('.app-section');
+
+            const reservationForm = document.getElementById('reservation-form');
+            const reservationAlert = document.getElementById('reservation-alert');
+
+            const myResSearch = document.getElementById('my-res-search');
+            const myResFilter = document.getElementById('my-res-filter');
+            const myResTbody = document.getElementById('my-reservations-tbody');
+
+            const coordinatorTbody = document.getElementById('coordinator-tbody');
+            const coordStatPending = document.getElementById('coord-stat-pending');
+            const coordStatApproved = document.getElementById('coord-stat-approved');
+            const coordStatRejected = document.getElementById('coord-stat-rejected');
+
+            const printReportBtn = document.getElementById('print-report-btn');
+
+            // --- AUTHENTICATION LOGIC ---
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('login-email').value.trim();
+                const password = document.getElementById('login-password').value.trim();
+                const role = document.getElementById('login-role').value;
+
+                loginAlert.classList.add('hidden');
+
+                // Validation logic
+                if (email === 'teacher@dnsc.edu.ph' && password === '123456' && role !== '') {
+                    // Success
+                    loginContainer.classList.add('hidden');
+                    appContainer.classList.remove('hidden');
+
+                    if (role === 'Teacher') {
+                        dashTitle.textContent = 'Teacher Dashboard';
+                        welcomeTitle.textContent = 'Welcome, Teacher!';
+                    } else if (role === 'Laboratory Coordinator') {
+                        dashTitle.textContent = 'Coordinator Dashboard';
+                        welcomeTitle.textContent = 'Welcome, Laboratory Coordinator!';
+                    }
+
+                    // Reset menu state to default Dashboard
+                    switchSection('sec-dashboard');
+                } else {
+                    loginAlert.textContent = 'Invalid login credentials. Please check your email, password, and role.';
+                    loginAlert.classList.remove('hidden');
+                }
+            });
+
+            // --- LOGOUT LOGIC ---
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // Clear input controls
+                document.getElementById('login-email').value = '';
+                document.getElementById('login-password').value = '';
+                document.getElementById('login-role').value = '';
+                loginAlert.classList.add('hidden');
+
+                // Toggle views
+                appContainer.classList.add('hidden');
+                loginContainer.classList.remove('hidden');
+
+                // Reset navigation to Dashboard
+                switchSection('sec-dashboard');
+            });
+
+            // --- SPA NAVIGATION LOGIC ---
+            function switchSection(targetSectionId) {
+                appSections.forEach(section => {
+                    if (section.id === targetSectionId) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    if (link.getAttribute('data-section') === targetSectionId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetSection = this.getAttribute('data-section');
+                    switchSection(targetSection);
+                });
+            });
+
+            // --- NEW RESERVATION FORM LOGIC ---
+            reservationForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const teacher = document.getElementById('res-teacher').value.trim();
+                const lab = document.getElementById('res-lab').value;
+                const dateVal = document.getElementById('res-date').value;
+                const students = document.getElementById('res-students').value;
+                const start = document.getElementById('res-start').value;
+                const end = document.getElementById('res-end').value;
+                const purpose = document.getElementById('res-purpose').value.trim();
+
+                if (teacher && lab && dateVal && students && start && end && purpose) {
+                    // Format Time and Date
+                    const formattedTime = formatTime(start) + ' - ' + formatTime(end);
+                    const formattedDate = formatDate(dateVal);
+
+                    // Append to local state array
+                    const newEntry = {
+                        id: Date.now(),
+                        lab: lab,
+                        date: formattedDate,
+                        time: formattedTime,
+                        purpose: purpose,
+                        status: 'Pending'
+                    };
+
+                    myReservationsData.unshift(newEntry);
+                    renderMyReservations();
+
+                    // Display Alert
+                    reservationAlert.classList.remove('hidden');
+                    setTimeout(() => {
+                        reservationAlert.classList.add('hidden');
+                    }, 4000);
+
+                    // Clear form
+                    reservationForm.reset();
+                }
+            });
+
+            // Format HH:MM to 12-hour AM/PM
+            function formatTime(timeStr) {
+                if (!timeStr) return '';
+                let [hours, minutes] = timeStr.split(':');
+                hours = parseInt(hours, 10);
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12 || 12;
+                return `${hours}:${minutes} ${ampm}`;
+            }
+
+            // Format YYYY-MM-DD to Month DD, YYYY
+            function formatDate(dateStr) {
+                if (!dateStr) return '';
+                const dateObj = new Date(dateStr);
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                return dateObj.toLocaleDateString('en-US', options);
+            }
+
+            // --- MY RESERVATIONS TABLE & FILTER LOGIC ---
+            function renderMyReservations() {
+                const searchVal = myResSearch.value.toLowerCase();
+                const filterVal = myResFilter.value;
+
+                myResTbody.innerHTML = '';
+
+                const filtered = myReservationsData.filter(item => {
+                    const matchesSearch = item.lab.toLowerCase().includes(searchVal) ||
+                                          item.date.toLowerCase().includes(searchVal) ||
+                                          item.purpose.toLowerCase().includes(searchVal);
+                    
+                    const matchesStatus = (filterVal === 'All Status') || (item.status === filterVal);
+
+                    return matchesSearch && matchesStatus;
+                });
+
+                if (filtered.length === 0) {
+                    myResTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No reservations found.</td></tr>`;
+                    return;
+                }
+
+                filtered.forEach(item => {
+                    const tr = document.createElement('tr');
+                    let badgeClass = 'badge-pending';
+                    if (item.status === 'Approved') badgeClass = 'badge-approved';
+                    if (item.status === 'Rejected') badgeClass = 'badge-rejected';
+
+                    tr.innerHTML = `
+                        <td>${item.lab}</td>
+                        <td>${item.date}</td>
+                        <td>${item.time}</td>
+                        <td>${item.purpose}</td>
+                        <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                    `;
+                    myResTbody.appendChild(tr);
+                });
+            }
+
+            myResSearch.addEventListener('input', renderMyReservations);
+            myResFilter.addEventListener('change', renderMyReservations);
+
+            // --- COORDINATOR DASHBOARD LOGIC ---
+            function renderCoordinatorTable() {
+                coordinatorTbody.innerHTML = '';
+
+                if (pendingRequestsData.length === 0) {
+                    coordinatorTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No pending requests.</td></tr>`;
+                    return;
+                }
+
+                pendingRequestsData.forEach(item => {
+                    const tr = document.createElement('tr');
+                    
+                    let actionCellContent = '';
+                    if (item.status === 'Pending') {
+                        actionCellContent = `
+                            <button class="btn btn-success btn-action-approve" data-id="${item.id}" style="padding: 6px 12px; font-size: 12px; margin-right: 4px;">Approve</button>
+                            <button class="btn btn-danger btn-action-reject" data-id="${item.id}" style="padding: 6px 12px; font-size: 12px;">Reject</button>
+                        `;
+                    } else if (item.status === 'Approved') {
+                        actionCellContent = `<span class="badge badge-approved">Approved</span>`;
+                    } else if (item.status === 'Rejected') {
+                        actionCellContent = `<span class="badge badge-rejected">Rejected</span>`;
+                    }
+
+                    tr.innerHTML = `
+                        <td>${item.teacher}</td>
+                        <td>${item.lab}</td>
+                        <td>${item.date}</td>
+                        <td>${item.time}</td>
+                        <td>${actionCellContent}</td>
+                    `;
+                    coordinatorTbody.appendChild(tr);
+                });
+
+                // Attach Action Listeners
+                document.querySelectorAll('.btn-action-approve').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'), 10);
+                        updateCoordinatorStatus(id, 'Approved');
+                    });
+                });
+
+                document.querySelectorAll('.btn-action-reject').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'), 10);
+                        updateCoordinatorStatus(id, 'Rejected');
+                    });
+                });
+            }
+
+            function updateCoordinatorStatus(id, newStatus) {
+                const target = pendingRequestsData.find(item => item.id === id);
+                if (target && target.status === 'Pending') {
+                    target.status = newStatus;
+
+                    // Update Counters
+                    let pendingCount = parseInt(coordStatPending.textContent, 10);
+                    let approvedCount = parseInt(coordStatApproved.textContent, 10);
+                    let rejectedCount = parseInt(coordStatRejected.textContent, 10);
+
+                    pendingCount = Math.max(0, pendingCount - 1);
+                    if (newStatus === 'Approved') approvedCount++;
+                    if (newStatus === 'Rejected') rejectedCount++;
+
+                    coordStatPending.textContent = pendingCount;
+                    coordStatApproved.textContent = approvedCount;
+                    coordStatRejected.textContent = rejectedCount;
+
+                    renderCoordinatorTable();
+                }
+            }
+
+            // --- REPORTS PRINT LOGIC ---
+            printReportBtn.addEventListener('click', function() {
+                window.print();
+            });
+
+            // --- INITIAL RENDERS ---
+            renderMyReservations();
+            renderCoordinatorTable();
+
+        });
+    </script>
+</body>
+</html>
